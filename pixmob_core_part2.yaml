@@ -1,0 +1,54 @@
+# PixMob ESPHome Integration - Part 2: Red Wings/Pistons
+
+# Detroit Sports Teams Light Show Buttons - Part 2
+button:
+  # Detroit Red Wings (Red and White)
+  - platform: template
+    name: "Red Wings Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            // Pattern definitions
+            const std::vector<std::vector<int>> patterns = {
+              // RED with fade
+              {1,1,0,0,1,0,1,0,0,1,0,0,0,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1},
+              // WHITISH with probabilistic fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,1},
+              // RED_2 with sharp probabilistic
+              {1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,0,1,0,1,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1},  // FADE_3
+              {0,0,1,0,0,0,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_3
+              {0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_3
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }
+
+  # Detroit Pistons (Red, White, and Blue)
+  - platform: template
+    name: "Pistons Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            const std::vector<std::vector<int>> patterns = {
+              // RED_3 with fade
+              {1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1},
+              // BLUE_2 with probabilistic fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1},
+              // WHITISH with sharp probabilistic
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,0,0,1,1,0,0,1,0,0,0,1,0,1,0,0,1,1,0,0,0,0,1},  // FADE_4
+              {0,0,0,1,0,1,0,0,1,0,0,0,1,0,1,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_4
+              {0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_4
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }

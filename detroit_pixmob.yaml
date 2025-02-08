@@ -1,0 +1,182 @@
+# Detroit PixMob ESPHome Configuration
+esphome:
+  name: detroit_pixmob
+  friendly_name: Detroit PixMob Controller
+
+esp8266:
+  board: d1_mini
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  
+  # Enable fallback hotspot
+  ap:
+    ssid: "Detroit-Pixmob Fallback"
+    password: !secret fallback_password
+
+# Configure IR LED output
+remote_transmitter:
+  pin: GPIO4
+  carrier_duty_percent: 50%
+
+# Effect selection dropdown
+select:
+  - platform: template
+    name: "PixMob Effect"
+    id: pixmob_effect
+    optimistic: true
+    options:
+      - "RED"
+      - "RED_2" 
+      - "RED_3"
+      - "RED_4"
+      - "RED_5"
+      - "GREEN"
+      - "GREEN_2"
+      - "GREEN_3"
+      - "BLUE"
+      - "BLUE_2"
+      - "BLUE_3"
+      - "LIGHT_BLUE"
+      - "LIGHT_BLUE_2"
+      - "YELLOW"
+      - "YELLOW_2"
+      - "YELLOW_3"
+      - "ORANGE"
+      - "ORANGE_2"
+      - "WHITISH"
+      - "WHITISH_2"
+
+  - platform: template
+    name: "Fade Effect"
+    id: fade_effect
+    optimistic: true
+    options:
+      - "NONE"
+      - "FADE_1"
+      - "FADE_2"
+      - "FADE_3"
+      - "FADE_4"
+      - "FADE_5"
+      - "FADE_6"
+
+# Send button
+button:
+  - platform: template
+    name: "Send Effect"
+    on_press:
+      then:
+        - lambda: |-
+            // Get selected effect patterns
+            std::map<std::string, std::vector<int>> effects = {
+              {"RED", {1,1,0,0,1,0,1,0,0,1,0,0,0,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"RED_2", {1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"RED_3", {1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"RED_4", {1,1,0,0,1,0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"RED_5", {1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"GREEN", {1,1,0,0,1,0,1,0,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"GREEN_2", {1,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"GREEN_3", {1,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"BLUE", {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1}},
+              {"BLUE_2", {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1}},
+              {"BLUE_3", {1,0,1,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1}},
+              {"LIGHT_BLUE", {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,1,0,0,1,0,0,0,1}},
+              {"LIGHT_BLUE_2", {1,0,1,0,1,1,0,0,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,0,1,1,0,0,1}},
+              {"YELLOW", {1,1,0,0,1,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"YELLOW_2", {1,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"YELLOW_3", {1,0,1,0,1,1,0,0,1,1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,0,1}},
+              {"ORANGE", {1,0,1,0,1,1,0,0,1,1,0,0,0,0,1,0,0,0,1,0,1,0,0,1,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1}},
+              {"ORANGE_2", {1,0,1,0,1,1,0,0,1,1,0,0,0,0,1,0,0,0,0,1,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"WHITISH", {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,1}},
+              {"WHITISH_2", {1,0,1,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,1,0,0,0,1}}
+            };
+
+            std::map<std::string, std::vector<int>> fade_codes = {
+              {"NONE", {}},
+              {"FADE_1", {0,0,0,1,0,1,1,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"FADE_2", {0,0,1,0,0,1,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"FADE_3", {0,0,0,1,0,1,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"FADE_4", {0,0,0,0,1,1,0,0,1,0,0,0,1,0,1,0,0,1,1,0,0,0,0,1}},
+              {"FADE_5", {0,0,0,1,0,1,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}},
+              {"FADE_6", {0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}}
+            };
+
+            std::string effect = id(pixmob_effect).state;
+            std::string fade = id(fade_effect).state;
+            
+            // Get the pattern and optional fade code
+            auto pattern = effects[effect];
+            auto fade_pattern = fade_codes[fade];
+            
+            // Combine patterns if fade is selected
+            if (fade != "NONE") {
+              pattern.insert(pattern.end(), fade_pattern.begin(), fade_pattern.end());
+            }
+
+            // Convert to run lengths (port of JavaScript bits_to_run_lengths function)
+            std::vector<int> run_lengths;
+            int current_count = 0;
+            int current_bit = -1;
+
+            for (int bit : pattern) {
+                if (bit != current_bit) {
+                    if (current_bit != -1) {
+                        run_lengths.push_back(current_count);
+                    }
+                    current_count = 1;
+                    current_bit = bit;
+                } else {
+                    current_count++;
+                }
+            }
+
+            if (current_bit != -1) {
+                run_lengths.push_back(current_count);
+            }
+
+            // Verify run lengths
+            for (int length : run_lengths) {
+                if (length > 9) {
+                    ESP_LOGE("PixMob", "Invalid run length: %d (must be ≤ 9)", length);
+                    return;
+                }
+            }
+
+            // Convert to timing array (each unit is 700µs)
+            std::vector<uint16_t> timings;
+            bool is_mark = true;
+            for (int length : run_lengths) {
+                timings.push_back(length * 700);
+                is_mark = !is_mark;
+            }
+
+            // Send the pattern
+            auto transmit = id(ir_transmitter).transmit();
+            transmit.set_carrier_frequency(38000);  // 38 kHz
+            transmit.space(0);  // No leading space
+            
+            for (size_t i = 0; i < timings.size(); i++) {
+                if (i % 2 == 0) {
+                    transmit.mark(timings[i]);
+                } else {
+                    transmit.space(timings[i]);
+                }
+            }
+            
+            transmit.send();
+            delay(3);  // Small delay between transmissions
+
+globals:
+  - id: ir_transmitter
+    type: remote_transmitter::RemoteTransmitterComponent
+    restore_value: no
+
+logger:
+  baud_rate: 0  # Disable UART logging since we use UART for IR

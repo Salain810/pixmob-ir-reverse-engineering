@@ -1,0 +1,213 @@
+# Detroit Sports Teams PixMob Integration
+
+# Required global component
+globals:
+  - id: ir_transmitter
+    type: remote_transmitter::RemoteTransmitterComponent
+    restore_value: no
+
+# Shared IR sending function
+script:
+  - id: send_pixmob_pattern
+    mode: queue
+    parameters:
+      pattern: std::vector<int>
+      tail: std::vector<int>
+    then:
+      - lambda: |-
+          auto combined = pattern;
+          combined.insert(combined.end(), tail.begin(), tail.end());
+          
+          std::vector<int> run_lengths;
+          int current_count = 0;
+          int current_bit = -1;
+
+          for (int bit : combined) {
+              if (bit != current_bit) {
+                  if (current_bit != -1) {
+                      run_lengths.push_back(current_count);
+                  }
+                  current_count = 1;
+                  current_bit = bit;
+              } else {
+                  current_count++;
+              }
+          }
+
+          if (current_bit != -1) {
+              run_lengths.push_back(current_count);
+          }
+
+          std::vector<uint16_t> timings;
+          bool is_mark = true;
+          for (int length : run_lengths) {
+              timings.push_back(length * 700);
+              is_mark = !is_mark;
+          }
+
+          auto transmit = id(ir_transmitter).transmit();
+          transmit.set_carrier_frequency(38000);
+          transmit.space(0);
+          
+          for (size_t i = 0; i < timings.size(); i++) {
+              if (i % 2 == 0) {
+                  transmit.mark(timings[i]);
+              } else {
+                  transmit.space(timings[i]);
+              }
+          }
+          
+          transmit.send();
+          delay(2000); // 2 second delay between patterns
+
+# Team Light Show Buttons
+button:
+  # Detroit Lions (Honolulu Blue and Silver)
+  - platform: template
+    name: "Lions Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            const std::vector<std::vector<int>> patterns = {
+              // LIGHT_BLUE with fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,1,0,0,1,0,0,0,1},
+              // WHITISH with probabilistic fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,1},
+              // LIGHT_BLUE_2 with sharp probabilistic
+              {1,0,1,0,1,1,0,0,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,0,1,1,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,0,1,0,1,1,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1},  // FADE_1
+              {0,0,0,1,0,0,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_1
+              {0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_1
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }
+
+  # Detroit Tigers (Navy and Orange)
+  - platform: template
+    name: "Tigers Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            const std::vector<std::vector<int>> patterns = {
+              // BLUE_2 with fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1},
+              // ORANGE with probabilistic fade
+              {1,0,1,0,1,1,0,0,1,1,0,0,0,0,1,0,0,0,1,0,1,0,0,1,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1},
+              // BLUE_3 with sharp probabilistic
+              {1,0,1,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,1,0,0,1,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1},  // FADE_2
+              {0,0,0,1,0,0,1,0,1,0,1,0,1,1,0,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_2
+              {0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_2
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }
+
+  # Detroit Red Wings (Red and White)
+  - platform: template
+    name: "Red Wings Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            const std::vector<std::vector<int>> patterns = {
+              // RED with fade
+              {1,1,0,0,1,0,1,0,0,1,0,0,0,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1},
+              // WHITISH with probabilistic fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,1},
+              // RED_2 with sharp probabilistic
+              {1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,0,1,0,1,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1},  // FADE_3
+              {0,0,1,0,0,0,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_3
+              {0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_3
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }
+
+  # Detroit Pistons (Red, White, and Blue)
+  - platform: template
+    name: "Pistons Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            const std::vector<std::vector<int>> patterns = {
+              // RED_3 with fade
+              {1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1},
+              // BLUE_2 with probabilistic fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1},
+              // WHITISH with sharp probabilistic
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,0,0,1,1,0,0,1,0,0,0,1,0,1,0,0,1,1,0,0,0,0,1},  // FADE_4
+              {0,0,0,1,0,1,0,0,1,0,0,0,1,0,1,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_4
+              {0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_4
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }
+
+  # University of Michigan (Maize and Blue)
+  - platform: template
+    name: "Michigan Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            const std::vector<std::vector<int>> patterns = {
+              // YELLOW with fade (Maize)
+              {1,1,0,0,1,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1},
+              // BLUE with probabilistic fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,1,0,0,0,1},
+              // YELLOW_2 with sharp probabilistic (Maize)
+              {1,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,0,1,0,1,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1},  // FADE_3
+              {0,0,0,1,0,0,1,0,1,0,1,0,1,1,0,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_2
+              {0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_3
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }
+
+  # Michigan State (Green and White)
+  - platform: template
+    name: "Michigan State Light Show"
+    on_press:
+      then:
+        - lambda: |-
+            const std::vector<std::vector<int>> patterns = {
+              // GREEN with fade
+              {1,1,0,0,1,0,1,0,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1},
+              // WHITISH with probabilistic fade
+              {1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,1},
+              // GREEN_2 with sharp probabilistic
+              {1,1,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}
+            };
+            
+            const std::vector<std::vector<int>> tails = {
+              {0,0,1,0,0,1,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,0,1},  // FADE_2
+              {0,0,0,1,0,0,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,0,1},  // FADE_PROBABILISTIC_1
+              {0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1}   // SHARP_PROBABILISTIC_2
+            };
+
+            for (int i = 0; i < patterns.size(); i++) {
+              id(send_pixmob_pattern).execute(patterns[i], tails[i]);
+            }
