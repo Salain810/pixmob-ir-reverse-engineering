@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# ESPHome credentials (copy secrets.yaml.example to secrets.yaml)
+secrets.yaml

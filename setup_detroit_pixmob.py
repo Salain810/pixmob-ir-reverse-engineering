@@ -12,6 +12,9 @@ def create_secrets_file():
     wifi_ssid = input("\nEnter your WiFi SSID: ")
     wifi_password = getpass.getpass("Enter your WiFi password: ")
     ota_password = getpass.getpass("Enter a password for OTA updates: ")
+    fallback_password = getpass.getpass("Enter a password for the fallback hotspot (8+ chars): ")
+    while len(fallback_password) < 8:
+        fallback_password = getpass.getpass("Must be at least 8 characters (WPA2). Try again: ")
     
     secrets_content = f"""# WiFi credentials
 wifi_ssid: "{wifi_ssid}"
@@ -21,7 +24,7 @@ wifi_password: "{wifi_password}"
 ota_password: "{ota_password}"
 
 # Fallback AP password
-fallback_password: "pixmob-backup"
+fallback_password: "{fallback_password}"
 """
     
     with open("secrets.yaml", "w") as f:
