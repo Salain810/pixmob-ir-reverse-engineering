@@ -21,7 +21,7 @@ wifi_password: "{wifi_password}"
 ota_password: "{ota_password}"
 
 # Fallback AP password
-fallback_password: "pixmob-backup"
+fallback_password: "change-me-fallback"
 """
     
     with open("secrets.yaml", "w") as f:
